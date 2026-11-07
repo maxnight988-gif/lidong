@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0705" />
+<title>立冬京华</title>
+
+<!--
+  ============================================================
+  立冬京华 · v3（照片完整显示 / 手机适配 / 无二维码）
+  ============================================================
+
+  文件夹里 3 个文件，发出去要一起发：
+    立冬快乐.html   页面
+    bg.jpg          照片（1200×1600，未裁切）
+    music.m4a       音乐（柴可夫斯基第一钢琴协奏曲 第一乐章 开头 103 秒）
+
+  【改文案】找 <h1 class="poem">
+  【改日期】找 <span class="date">
+  【换照片】新的照片命名 bg.jpg 覆盖（竖图 3:4 最好，其他比例也不会被裁）
+  【换音乐】新的音乐命名 music.m4a 覆盖
+  ============================================================
+-->
+
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  :root{
+    --ink:#0b0705;        /* 背景黑 */
+    --paper:#f4e8d8;      /* 文字米白 */
+    --accent:#e6b079;     /* 暖金 */
+  }
+
+  html,body{ min-height:100%; }
+
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:"Songti SC","STSong",'宋体',"Noto Serif SC",serif;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:0;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ===== 海报：照片 + 下方文字，整块居中 ===== */
+  .poster{
+    /* 宽度受三件事约束：屏幕宽、最大 560、以及「高度扣掉文字区后还剩多少」。
+       340px 是文字区（标签+三行诗+底部一行）的大致高度，宁可留白也不要溢出。 */
+    width:min(100vw, 560px, calc((100dvh - 340px) * 3 / 4));
+    display:flex; flex-direction:column;
+    animation:rise 1.1s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:none } }
+
+  /* 照片：容器就是 3:4，object-fit:cover 时不会裁掉内容（比例一致） */
+  .photo{
+    display:block;
+    width:100%;
+    aspect-ratio:3 / 4;
+    object-fit:cover;
+    background:#120d0a;
+  }
+
+  /* 文字区：压在照片下方，不遮照片 */
+  .text{
+    background:var(--ink);
+    padding:clamp(18px, 4.2vw, 30px) clamp(18px, 4.6vw, 30px) clamp(20px, 4.6vw, 30px);
+  }
+
+  .term{
+    font-size:clamp(10px, 2.5vw, 12px);
+    letter-spacing:.42em;
+    text-indent:.42em;
+    color:rgba(244,232,216,.6);
+    margin-bottom:clamp(10px, 2.4vw, 14px);
+  }
+  .term b{ color:var(--accent); font-weight:400; }
+
+  .poem{
+    font-weight:500;
+    font-size:clamp(26px, 7vw, 40px);
+    line-height:1.62;
+    letter-spacing:.06em;
+    color:#fbf3e8;
+  }
+  .poem .tea{ font-size:.62em; vertical-align:.12em; margin-left:.14em; }
+
+  .foot{
+    margin-top:clamp(16px, 3.6vw, 22px);
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; row-gap:8px;
+  }
+
+  .date{
+    font-size:clamp(10px, 2.4vw, 12px);
+    letter-spacing:.32em;
+    color:rgba(244,232,216,.5);
+  }
+
+  .right{ display:flex; align-items:center; gap:10px; }
+
+  /* 音乐提示：点了就消失 */
+  .hint{
+    font-size:11px; letter-spacing:.14em;
+    white-space:nowrap;
+    color:rgba(230,176,121,.85);
+    animation:blink 2.8s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{ opacity:.3 } 50%{ opacity:.9 } }
+
+  .music{
+    width:42px; height:42px; flex:0 0 auto;
+    border-radius:50%;
+    border:1px solid rgba(230,176,121,.55);
+    background:rgba(230,176,121,.08);
+    color:var(--accent);
+    font-size:14px; line-height:1;
+    cursor:pointer;
+    display:grid; place-items:center;
+    transition:background .25s, box-shadow .25s, transform .15s;
+  }
+  .music:hover{ background:rgba(230,176,121,.18); box-shadow:0 0 20px rgba(230,176,121,.25); }
+  .music:active{ transform:scale(.94); }
+  .music.playing{
+    background:var(--accent); color:#1a1208;
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(230,176,121,.45) } 50%{ box-shadow:0 0 0 9px rgba(230,176,121,0) } }
+
+  /* 手机竖屏：照片顶到边，文字区去掉左右留白以外的多余空间 */
+  @media (max-width: 480px){
+    .text{ padding-bottom:max(24px, env(safe-area-inset-bottom)); }
+  }
+
+  /* ===== 宽屏（电脑 / 平板横放）：改成左右版，照片在左、文字在右，别再挤成一根柱 ===== */
+  @media (min-aspect-ratio: 4/3) and (min-width: 900px){
+    .poster{
+      width:auto;
+      height:min(88dvh, 780px);
+      flex-direction:row;
+      align-items:stretch;
+    }
+    .photo{
+      height:100%;
+      width:auto;
+      aspect-ratio:auto;
+      object-fit:contain;
+    }
+    .text{
+      width:clamp(290px, 26vw, 380px);
+      display:flex; flex-direction:column; justify-content:center;
+      padding:clamp(28px, 3vw, 44px);
+    }
+    .poem{ font-size:clamp(26px, 2.5vw, 34px); }
+    .term{ margin-bottom:14px; }
+    .foot{ margin-top:clamp(18px, 2.4vw, 26px); }
+  }
+
+  /* 横屏或很矮的窗口：照片缩到能看见，别被挤没 */
+  @media (max-height: 560px){
+    .poster{ width:min(100vw, calc((100dvh - 240px) * 3 / 4)); }
+    .poem{ font-size:clamp(20px, 4.6vw, 28px); }
+  }
+
+  /* 系统开了「减少动态效果」 */
+  @media (prefers-reduced-motion: reduce){
+    .poster, .hint, .music.playing{ animation:none !important; opacity:1 !important; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="poster">
+    <!-- 照片：完整显示，不裁切 -->
+    <img class="photo" src="bg.jpg" alt="立冬 · 手执枫叶" />
+
+    <div class="text">
+      <p class="term">立冬 · <b>二〇二六</b></p>
+
+      <h1 class="poem">
+        立冬京华，<br />
+        执枫煮茶，<br />
+        温酒趁年华<span class="tea">🍵</span>
+      </h1>
+
+      <div class="foot">
+        <span class="date">2026.11.07</span>
+        <div class="right">
+          <span class="hint" id="hint">点这里放音乐</span>
+          <button class="music" id="musicBtn" aria-label="播放背景音乐" title="播放背景音乐">♪</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bgm" src="music.m4a" loop preload="auto"></audio>
+
+<script>
+/* 背景音乐：浏览器不允许自动播放，必须点一下 ♪ */
+const bgm  = document.getElementById('bgm');
+const btn  = document.getElementById('musicBtn');
+const hint = document.getElementById('hint');
+
+function setPlaying(on){
+  btn.classList.toggle('playing', on);
+  btn.textContent = on ? '❚❚' : '♪';
+  if (on) hint.style.display = 'none';
+}
+
+btn.addEventListener('click', async () => {
+  if (bgm.paused){
+    try { await bgm.play(); setPlaying(true); }
+    catch (e) { hint.textContent = '音乐没找到'; }
+  } else {
+    bgm.pause(); setPlaying(false);
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space'){ e.preventDefault(); btn.click(); }
+});
+
+bgm.addEventListener('error', () => { hint.textContent = '找不到 music.m4a'; });
+</script>
+</body>
+</html>
